@@ -111,5 +111,6 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
 
 
     if (!localStorage.browserNotifier) returnBN.__init__()
+    else callback()
     return returnBN
 }
