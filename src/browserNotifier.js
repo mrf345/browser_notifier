@@ -1,6 +1,6 @@
 // Dependencies: jQuery, jQuery-ui, FontAwesome
 
-var browserNotifier = function (options={}, callback=function () {}) {
+var browserNotifier = function (options={}, callback=function () {}, onload=function () {}) {
     returnBN = {} // unique object name to return
 
     returnBN.options = {
@@ -12,6 +12,7 @@ var browserNotifier = function (options={}, callback=function () {}) {
             'font-family': 'Georgia, Times, serif',
             'text-shadow': '0 0 30px rgba(255,255,255,0.5)'
         },
+        iconLink: options.iconLink || 'https://www.mozilla.org/firefox/download/thanks/',
         iconClass: options.iconClass || 'fa fa-firefox',
         iconStyle: options.iconStyle || {
             'color': 'white',
@@ -20,7 +21,12 @@ var browserNotifier = function (options={}, callback=function () {}) {
         },
         buttonText: options.buttonText || 'I understand, just continue.',
         buttonClass: options.buttonClass || 'btn btn-lg btn-warning',
-        buttonStyle: options.buttonStyle || {'font-family': 'Georgia, Times, serif'},
+        buttonStyle: options.buttonStyle || {
+            'font-family': 'Georgia, Times, serif',
+            'font-size': '140%',
+            'font-weight': 'bold',
+            'font-stretch': 'ultra-expanded'
+        },
         overlayColor: options.overlayColor || 'rgba(0,0,0,0.85)',
         overlayClass: options.overlayClass || '',
         overlayStyle: options.overlayStyle || {},
@@ -40,9 +46,16 @@ var browserNotifier = function (options={}, callback=function () {}) {
             button: $('<button>').addClass(returnBN.options.buttonClass).css(returnBN.options.buttonStyle)
             .text(returnBN.options.buttonText).click(function () {
                 returnBN.__exit__()
-                callback()
             }),
-            icon: $('<span>').addClass(returnBN.options.iconClass).css(returnBN.options.iconStyle)
+            icon: $('<a>').attr('href', returnBN.options.iconLink).attr('target', '_blank')
+            .append(
+                $('<span>').addClass(returnBN.options.iconClass).css(returnBN.options.iconStyle)
+                .hover(function () {
+                    $(this).animate({'color': 'gray'})
+                }, function () {
+                    $(this).animate({'color': 'white'})
+                })
+            )
         }
     }
 
@@ -77,11 +90,11 @@ var browserNotifier = function (options={}, callback=function () {}) {
         ) throw new Error('Error: available browsers ' + Object.keys(returnBN.defaults.browsers))
         var todoTwice = function () {
             if (navigator.userAgent.indexOf(returnBN.options.browser) === -1) {
+                onload()
                 $('body').append(returnBN.defaults.elements.overlay)
                 $(returnBN.defaults.elements.overlay).animate({'opacity': '1'}, returnBN.options.effectDuration)
             }
         }
-        localStorage.browserNotifier = 'yes'
         if (document.readyState === 'complete') todoTwice()
         else $(todoTwice)
 
@@ -91,6 +104,8 @@ var browserNotifier = function (options={}, callback=function () {}) {
         $(returnBN.defaults.elements.overlay).animate({'opacity': '0'}, returnBN.options.effectDuration,
         complete=function () {
             $(returnBN.defaults.elements.overlay).remove()
+            localStorage.browserNotifier = 'yes'
+            callback()
         })
     }
 
