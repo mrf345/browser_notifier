@@ -88,9 +88,9 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
                 returnBN.defaults.browsers
             ).indexOf(returnBN.options.browser) === -1
         ) throw new Error('Error: available browsers ' + Object.keys(returnBN.defaults.browsers))
+        onload()
         var todoTwice = function () {
             if (navigator.userAgent.indexOf(returnBN.options.browser) === -1) {
-                onload()
                 $('body').append(returnBN.defaults.elements.overlay)
                 $(returnBN.defaults.elements.overlay).animate({'opacity': '1'}, returnBN.options.effectDuration)
             }
