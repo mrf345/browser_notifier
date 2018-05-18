@@ -4,7 +4,6 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
     returnBN = {} // unique object name to return
 
     returnBN.options = {
-        browser: options.browser || 'Firefox', // list of browsers to notify for
         text: options.text || 'You are not using Firefox, which this project is designed and most suited for.',
         textClass: options.textClass || '',
         textStyle: options.textStyle || {
@@ -30,17 +29,14 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
         overlayColor: options.overlayColor || 'rgba(0,0,0,0.85)',
         overlayClass: options.overlayClass || '',
         overlayStyle: options.overlayStyle || {},
-        effectDuration: options.effectDuration * 1000 || 1000
+        effectDuration: options.effectDuration * 1000 || 1000,
+        storeVal: options.storeVal || 'browserNotifier', // value to to identify notifier in localStorage
+        validator: options.validator || function () {
+            return false
+        } // if returns true notifier will be activated
     }
 
     returnBN.defaults = { // list of browsers name in navigator and fa- icon names
-        browsers: {
-            MSIE: 'edge',
-            Firefox: 'firefox',
-            Chrome: 'chrome',
-            Opera: 'opera',
-            Safari: 'safari'
-        },
         elements: { // list of jQuery elements to be appended
             text: $('<h1>').text(returnBN.options.text).css(returnBN.options.textStyle).addClass('text-center'),
             button: $('<button>').addClass(returnBN.options.buttonClass).css(returnBN.options.buttonStyle)
@@ -83,17 +79,14 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
 
 
     returnBN.__init__ = function () {
-        if (
-            Object.keys(
-                returnBN.defaults.browsers
-            ).indexOf(returnBN.options.browser) === -1
-        ) throw new Error('Error: available browsers ' + Object.keys(returnBN.defaults.browsers))
         onload()
         var todoTwice = function () {
-            if (navigator.userAgent.indexOf(returnBN.options.browser) === -1) {
+            if (returnBN.options.validator()) {
                 $('body').append(returnBN.defaults.elements.overlay)
                 $(returnBN.defaults.elements.overlay).animate({'opacity': '1'}, returnBN.options.effectDuration)
             } else callback()
+            // if (navigator.userAgent.indexOf(returnBN.options.browser) === -1) { 
+            // } else callback()
         }
         if (document.readyState === 'complete') todoTwice()
         else $(todoTwice)
@@ -104,13 +97,13 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
         $(returnBN.defaults.elements.overlay).animate({'opacity': '0'}, returnBN.options.effectDuration,
         complete=function () {
             $(returnBN.defaults.elements.overlay).remove()
-            localStorage.browserNotifier = 'yes'
+            localStorage[returnBN.options.storeVal] = 'yes'
             callback()
         })
     }
 
 
-    if (!localStorage.browserNotifier) returnBN.__init__()
+    if (!localStorage[returnBN.options.storeVal]) returnBN.__init__()
     else callback()
     return returnBN
 }
