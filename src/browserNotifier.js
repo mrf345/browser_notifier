@@ -32,7 +32,9 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
         effectDuration: options.effectDuration * 1000 || 1000,
         storeVal: options.storeVal || 'browserNotifier', // value to to identify notifier in localStorage
         validator: options.validator || function () {
-            return false
+            return new Promise(function (resolve, reject) {
+                return resolve(true)
+            })
         } // if returns true notifier will be activated
     }
 
@@ -81,12 +83,17 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
     returnBN.__init__ = function () {
         onload()
         var todoTwice = function () {
-            if (returnBN.options.validator()) {
-                $('body').append(returnBN.defaults.elements.overlay)
-                $(returnBN.defaults.elements.overlay).animate({'opacity': '1'}, returnBN.options.effectDuration)
-            } else callback()
-            // if (navigator.userAgent.indexOf(returnBN.options.browser) === -1) { 
-            // } else callback()
+            returnBN.options.validator()
+            .then(
+                function () {
+                    $('body').append(returnBN.defaults.elements.overlay)
+                    $(returnBN.defaults.elements.overlay).animate({'opacity': '1'}, returnBN.options.effectDuration)
+                }
+            ).catch(
+                function (e) {
+                    callback()
+                }
+            )
         }
         if (document.readyState === 'complete') todoTwice()
         else $(todoTwice)
