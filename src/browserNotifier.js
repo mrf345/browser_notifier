@@ -1,6 +1,6 @@
 // Dependencies: jQuery, jQuery-ui, FontAwesome
 
-var browserNotifier = function (options={}, callback=function () {}, onload=function () {}) {
+var browserNotifier = function (options={}, callback=function () {}) {
     returnBN = {} // unique object name to return
 
     returnBN.options = {
@@ -44,6 +44,7 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
             button: $('<button>').addClass(returnBN.options.buttonClass).css(returnBN.options.buttonStyle)
             .text(returnBN.options.buttonText).click(function () {
                 returnBN.__exit__()
+                callback()
             }),
             icon: $('<a>').attr('href', returnBN.options.iconLink).attr('target', '_blank')
             .append(
@@ -81,7 +82,6 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
 
 
     returnBN.__init__ = function () {
-        onload()
         var todoTwice = function () {
             returnBN.options.validator()
             .then(
@@ -97,7 +97,6 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
         }
         if (document.readyState === 'complete') todoTwice()
         else $(todoTwice)
-
     }
 
     returnBN.__exit__ = function () {
@@ -105,7 +104,6 @@ var browserNotifier = function (options={}, callback=function () {}, onload=func
         complete=function () {
             $(returnBN.defaults.elements.overlay).remove()
             localStorage[returnBN.options.storeVal] = 'yes'
-            callback()
         })
     }
 
